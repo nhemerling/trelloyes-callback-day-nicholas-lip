@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
-import List from './List'
-import './App.css';
+import React, { Component } from "react";
+import List from "./List";
+import "./App.css";
 
 class App extends Component {
   constructor(props) {
@@ -8,22 +8,18 @@ class App extends Component {
     this.state = {
       lists: [
         {
-          id: '1',
-          header: 'First list',
-          cardIds: [ 'a', 'b']
+          id: "1",
+          header: "First list",
+          cardIds: [],
         },
         {
-          id: '2',
-          header: 'Second list',
-          cardIds: ['b', 'c'],
+          id: "2",
+          header: "Second list",
+          cardIds: [],
         },
       ],
-      allCards: {
-        'a': { id: 'a', title: 'First card', content: 'lorem ipsum' },
-        'b': { id: 'b', title: 'Second card', content: 'lorem ipsum' },
-        'c': { id: 'c', title: 'Third card', content: 'lorem ipsum' }
-      }
-    }
+      allCards: {},
+    };
   }
   // static defaultProps = {
   //   store: {
@@ -32,59 +28,80 @@ class App extends Component {
   //   }
   // };
 
-  function omit(obj, keyToOmit) {
-    let {[keyToOmit]: _, ...rest} = obj;
+  omit = (obj, keyToOmit) => {
+    let { [keyToOmit]: _, ...rest } = obj;
     return rest;
-  }
-  
-  //Example
-  const objectWithKVPs = {
-    key: 'value',
-    foo: 'foo value',
-    bar: 'bar value',
-    abc: { nested: 'object' }
-  }
-  
-  //To remove the foo key value pair
-  const newObjectWithKVPs = omit(objectWithKVPs, 'foo');
-  
-  handleDeleteCard = (card) => {
+  };
+
+  handleDeleteCard = (cardId) => {
     // console.log('handle delete card called')
-    const newCards = this.state.allCards.filter(id => id !== card.id)
+    const newCards = this.omit(this.state.allCards, cardId);
+    console.log(this.state.allCards)
+    const newList = this.state.lists.map((list) => {
+      return {
+        cardIds: list.cardIds.filter((cardIds) => cardIds !== cardId),
+        id: list.id,
+        header: list.header,
+      };
+    });
+
+    console.log(newList);
+
     this.setState({
-      allCards: newCards
+      lists: newList,
+      allCards: newCards,
+    });
+  };
+
+  newRandomCard = () => {
+    const id =
+      Math.random()
+        .toString(36)
+        .substring(2, 4) +
+      Math.random()
+        .toString(36)
+        .substring(2, 4);
+    return {
+      id,
+      title: `Random Card ${id}`,
+      content: "lorem ipsum",
+    };
+  };
+
+  handleAddRandomCard = (listId) => {
+    let newCard = this.newRandomCard();
+    const newList = this.state.lists.map((list) => {
+      let cardIds = [...list.cardIds];
+      if (list.id === listId){
+        cardIds.push(newCard.id)
+      }
+      return {
+        cardIds: cardIds,
+        id: list.id,
+        header: list.header,
+      };
     })
-    
-    const newList = this.state.lists.filter(list => list.cardIds !== card.id)
-  }
 
-  // const newRandomCard = () => {
-  //   const id = Math.random().toString(36).substring(2, 4)
-  //     + Math.random().toString(36).substring(2, 4);
-  //   return {
-  //     id,
-  //     title: `Random Card ${id}`,
-  //     content: 'lorem ipsum',
-  //   }
-  // }
-
-  handleAddRandomCard = () => {
-    console.log('handle add random card called')
-  }
+    this.setState({
+      allCards: {...this.state.allCards, [newCard.id]: newCard},
+      lists: newList
+    })
+  };
 
   render() {
     // const { store } = this.props
     return (
-      <main className='App'>
-        <header className='App-header'>
+      <main className="App">
+        <header className="App-header">
           <h1>Trelloyes!</h1>
         </header>
-        <div className='App-list'>
-          {this.state.lists.map(list => (
+        <div className="App-list">
+          {this.state.lists.map((list) => (
             <List
               key={list.id}
+              id={list.id}
               header={list.header}
-              cards={list.cardIds.map(id => this.state.allCards[id])}
+              cards={list.cardIds.map((id) => this.state.allCards[id])}
               onDeleteCard={this.handleDeleteCard}
               onAddRandomCard={this.handleAddRandomCard}
             />
